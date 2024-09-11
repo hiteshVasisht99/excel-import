@@ -31,6 +31,8 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/employee/create", handlers.UploadFile).Methods(http.MethodPost)
+	r.HandleFunc("/employee/{id}", handlers.GetEmployeeDataByID).Methods(http.MethodGet)
+	r.HandleFunc("/employee/{id}", handlers.UpdateEmployeeDataByID).Methods(http.MethodPut)
 
 	log.Println("Starting the service")
 	http.ListenAndServe(":8108", r)
@@ -54,14 +56,15 @@ func EstablishDBConnection() *sql.DB {
 }
 
 func EstablishRedisConn() *redis.Client {
+	redisHost := os.Getenv("REDIS_HOST")
 	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: redisHost,
 		DB:   0,
 	})
 	pong, err := client.Ping(context.Background()).Result()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Redis connection established successfully", pong)
+	log.Println("Redis connection established successfully :", pong)
 	return client
 }
